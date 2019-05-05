@@ -1,12 +1,12 @@
 # PvDoniaLeti
-School Project made in java for Ingenieria de Software
--la tabla ya no es editable 
--corregido error en la tabla por redundancia
--agregado la funcion "agregarcomida"
--agregado la funcion "mostrarID"
--btn "Agregar2" funcionandow
--agregada la funcion "comidaBuscada"
--agregada la funcion "buscarComida"
--btn "Buscar2" funcionando
--agregada la funcion "modificar"
-btn "modificar2" funcionando
+School Project made in java for Ingenieria de Software<br />
+-la tabla ya no es editable <br />
+-corregido error en la tabla por redundancia<br />
+-agregado la funcion "agregarcomida"<br />
+-agregado la funcion "mostrarID"<br />
+-btn "Agregar2" funcionandow<br />
+-agregada la funcion "comidaBuscada"<br />
+-agregada la funcion "buscarComida"<br />
+-btn "Buscar2" funcionando<br />
+-agregada la funcion "modificar"<br />
+btn "modificar2" funcionando<br />
