@@ -4,7 +4,7 @@ School Project made in java for Ingenieria de Software
 -corregido error en la tabla por redundancia
 -agregado la funcion "agregarcomida"
 -agregado la funcion "mostrarID"
--btn "Agregar2" funcionando
+-btn "Agregar2" funcionandow
 -agregada la funcion "comidaBuscada"
 -agregada la funcion "buscarComida"
 -btn "Buscar2" funcionando
