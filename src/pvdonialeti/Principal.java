@@ -144,15 +144,17 @@ public class Principal extends javax.swing.JFrame {
         DefaultTableModel model=(DefaultTableModel) tableCarrito.getModel(); 
 
         model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo","Cantidad"});
-   
+        int cantidad;
+        cantidad = Integer.valueOf(JOptionPane.showInputDialog(null, "Inserte cantidad:"));
         
-        Object[] row = new Object[3];
+        Object[] row = new Object[4];
         
         for(int i = 0; i < comidas.size(); i++)
         {
             row[0] = comidas.get(i).getId();
             row[1] = comidas.get(i).getNombre();
             row[2] = comidas.get(i).getCosto();
+            row[3] = cantidad;
             
             model.addRow(row);
         }
@@ -547,13 +549,13 @@ public class Principal extends javax.swing.JFrame {
         
         //pruebas para idiotas
         if (!tableComidas.isRowSelected(tableComidas.getSelectedRow()))
-        JOptionPane.showMessageDialog(null, "Seleccione reloj!");
+        JOptionPane.showMessageDialog(null, "Seleccione comida!");
         for (int i=0; i<row.length; i++){
             comidaSeleccionada[i] =  (int) tableComidas.getValueAt(row[i], columna);
             //JOptionPane.showMessageDialog(null, comidaSeleccionada[i] );
         }
         if (comidaSeleccionada != null )
-        traeraTabla2();
+            traeraTabla2();
 
         tableComidas.clearSelection();
         
@@ -600,8 +602,11 @@ public class Principal extends javax.swing.JFrame {
     private void btnEliminar0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminar0ActionPerformed
         // TODO add your handling code here:
         //lstComidas0.getSelectedIndex();
-        list0 = quitarlista(list0, lstComidas0.getSelectedIndex());
-        lstComidas0.setListData(list0);
+        int preguntar = JOptionPane.showConfirmDialog(null, "Desea eliminar?");
+        if (preguntar == 0){
+            list0 = quitarlista(list0, lstComidas0.getSelectedIndex());
+            lstComidas0.setListData(list0);
+        }
     }//GEN-LAST:event_btnEliminar0ActionPerformed
 
     private void btnAgregar0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregar0ActionPerformed
