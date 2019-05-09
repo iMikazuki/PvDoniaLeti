@@ -1,5 +1,11 @@
 package pvdonialeti;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JOptionPane;
 
 /**
@@ -9,6 +15,9 @@ import javax.swing.JOptionPane;
 public class Ventas extends javax.swing.JFrame {
     double total = 0;
     String[] list0 = new String[100];
+    String[] comida = new String[100];
+    int[] cantidad = new int[100];
+    String listaComidas = "";
     public int maxDato = 0;
       //VER PORQUE NO PUEDO  SACAR EL TOTAL, ME MANDA UNA EXCEPCION AL CALCULARLO
     public void calcularTotal(){
@@ -22,10 +31,10 @@ public class Ventas extends javax.swing.JFrame {
         
         try{
             //jTable1.selectAll();
-            for (int i = 0; i < jTable1.getRowCount(); i++){
+            for (int i = 0; i < tableVentas.getRowCount(); i++){
                 //cantidad[i] = (int) jTable1.getValueAt(i, 5);
                 //total = total + (double) jTable1.getValueAt(i, 3);
-                total = total + ((double)jTable1.getValueAt(i, 2)*(int)jTable1.getValueAt(i, 3));
+                total = total + ((double)tableVentas.getValueAt(i, 2)*(int)tableVentas.getValueAt(i, 3));
                 //JOptionPane.showMessageDialog(jTable1.getValueAt(i, 2)+"");
             }
             txtTotal.setText(""+total);
@@ -38,11 +47,23 @@ public class Ventas extends javax.swing.JFrame {
         
     }
     
+    public Connection hacerConexion(){
+            Connection con = null;
+
+            try{
+                con = DriverManager.getConnection("jdbc:mysql://localhost/pvdonialeti","root","");
+            }catch(SQLException ex){
+                System.out.println(ex.getMessage());
+            }
+
+            return con;
+    }
+    
     public void returnshit (){
         Principal framePrincipal = new Principal();
         framePrincipal.setVisible(true);
         //regresar el carrito
-        framePrincipal.tableCarrito.setModel(jTable1.getModel());
+        framePrincipal.tableCarrito.setModel(tableVentas.getModel());
         //regresar los encargos
         framePrincipal.lstComidas0.setListData(list0);
         framePrincipal.list0 = this.list0;
@@ -50,6 +71,57 @@ public class Ventas extends javax.swing.JFrame {
         
         this.dispose();
         
+    }
+    
+    public void obtenerComidas(){
+        //HACER UN TRY `PARA NULLPOINTER PARA VERIFICAR QUE NO META NULL EN ARREGLO INT
+       
+        tableVentas.selectAll();
+        for(int i=0; i<tableVentas.getRowCount();i++){
+           
+            try{
+                comida[i] = (String) tableVentas.getValueAt(i, 1);
+                cantidad[i] = (int) tableVentas.getValueAt(i, 3);
+            }catch(NullPointerException ex){
+                
+                tableVentas.clearSelection();
+                //jTable1.changeSelection(i, 5, true, true);
+            }
+            
+            //JOptionPane.showMessageDialog(null, cantidad[i]);
+        }
+        
+      
+    }
+    
+    public void stringidComidas(){
+        listaComidas = "";
+        for (int i=0; i<tableVentas.getRowCount(); i++){
+            //CORREGIR
+            listaComidas = "["+comida[i] + ", Cantidad: " + cantidad[i] + "]-" + listaComidas ;
+        }
+        
+    }
+    
+    public void registrarVenta(){
+        Date fecha = new Date();
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy");
+        String fechaString = DATE_FORMAT.format(fecha);
+        
+        try{
+            Connection con = hacerConexion();
+            Statement st = con.createStatement();
+            Statement statement = con.createStatement();
+            statement.executeUpdate("INSERT INTO `ventas` (`idVenta`, `comidas`, `total`,`fecha`)"
+                                    + "VALUES(NULL, '"+listaComidas+"', '"+total+"', '"+fechaString+"')" );
+            con.close();
+            st.close();
+
+            JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
+        }catch(SQLException ex) {
+             System.out.println(ex.getMessage());
+            
+        }
     }
     
     /**
@@ -69,7 +141,7 @@ public class Ventas extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableVentas = new javax.swing.JTable();
         btnRegresar = new javax.swing.JButton();
         txtTotal = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -83,7 +155,7 @@ public class Ventas extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableVentas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -109,7 +181,7 @@ public class Ventas extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tableVentas);
 
         btnRegresar.setText("Regresar");
         btnRegresar.addActionListener(new java.awt.event.ActionListener() {
@@ -127,6 +199,11 @@ public class Ventas extends javax.swing.JFrame {
         jLabel1.setText("TOTAL:");
 
         btnRealizar.setText("Realizar Venta");
+        btnRealizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRealizarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -171,8 +248,8 @@ public class Ventas extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-        if (jTable1.getCellEditor() != null) {
-            jTable1.getCellEditor().stopCellEditing();
+        if (tableVentas.getCellEditor() != null) {
+            tableVentas.getCellEditor().stopCellEditing();
         }
         
         returnshit();;
@@ -194,6 +271,13 @@ public class Ventas extends javax.swing.JFrame {
         // TODO add your handling code here:
         calcularTotal();
     }//GEN-LAST:event_formWindowOpened
+
+    private void btnRealizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRealizarActionPerformed
+        // TODO add your handling code here:
+        obtenerComidas();
+        stringidComidas();
+        registrarVenta();
+    }//GEN-LAST:event_btnRealizarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -235,7 +319,7 @@ public class Ventas extends javax.swing.JFrame {
     private javax.swing.JButton btnRegresar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    public javax.swing.JTable jTable1;
+    public javax.swing.JTable tableVentas;
     private javax.swing.JTextField txtTotal;
     // End of variables declaration//GEN-END:variables
 }

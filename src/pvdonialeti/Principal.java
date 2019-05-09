@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -19,6 +21,9 @@ public class Principal extends javax.swing.JFrame {
     private int[] comidaSeleccionada = new int[100];
     public int[] comidaParaVenta = new int[100];
     public String[] list0 = new String[100];
+    public String[] list4 = new String[100];
+    public double corteTotal = 1110;
+    
     //public List<String> list0 = new ArrayList<String>();
     int maxDato = 0;
      // CONECTAR A  LA BD
@@ -71,6 +76,78 @@ public class Principal extends javax.swing.JFrame {
         return comida;
     }
     
+    public ArrayList<ClaseCorte> ListaCorte()
+    {
+        ArrayList<ClaseCorte> corte = new ArrayList<>();
+        
+        Statement st;
+        ResultSet rs;
+         
+        try{
+            Connection con = hacerConexion();
+            st = con.createStatement();
+                              
+            //BUSQUEDA DEFAULT (ALL)
+            
+            String searchQuery = "SELECT * FROM `cortes`";
+            rs = st.executeQuery(searchQuery);
+
+            ClaseCorte claseCorte;
+
+            while(rs.next())
+            {
+                claseCorte = new ClaseCorte(
+                                 rs.getInt("idCorte"),
+                                 rs.getString("fecha"),
+                                 rs.getDouble("corte")                                     
+                                );
+                corte.add(claseCorte);
+            }
+            
+            con.close();
+        }catch(SQLException ex){
+            System.out.println(ex.getMessage());
+        }
+        
+        return corte;
+    }
+    
+    public ArrayList<ClaseRealizados> ListaRealizados()
+    {
+        ArrayList<ClaseRealizados> realizados = new ArrayList<>();
+        
+        Statement st;
+        ResultSet rs;
+         
+        try{
+            Connection con = hacerConexion();
+            st = con.createStatement();
+                              
+            //BUSQUEDA DEFAULT (ALL)
+            
+            String searchQuery = "SELECT * FROM `ventas`";
+            rs = st.executeQuery(searchQuery);
+
+            ClaseRealizados claseRealizados;
+
+            while(rs.next())
+            {
+                claseRealizados = new ClaseRealizados(
+                                 rs.getInt("idVenta"),
+                                 rs.getString("comidas"),
+                                 rs.getDouble("total"),  
+                                 rs.getString("fecha")
+                                );
+                realizados.add(claseRealizados);
+            }
+            
+            con.close();
+        }catch(SQLException ex){
+            System.out.println(ex.getMessage());
+        }
+        
+        return realizados;
+    }
     
     //para regresar con las comidas en el carrito
     public ArrayList<ClaseComida> ListaComidasSeleccionadas()
@@ -117,9 +194,9 @@ public class Principal extends javax.swing.JFrame {
         DefaultTableModel model=(DefaultTableModel) tableComidas.getModel(); 
         //DefaultTableModel model = new DefaultTableModel();
         model.setNumRows(0);            //resetear la tabla
-        model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo"});
+        //model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo"});
         
-        
+      
         Object[] row = new Object[3];
         
         for(int i = 0; i < comidas.size(); i++)
@@ -147,7 +224,7 @@ public class Principal extends javax.swing.JFrame {
       
         DefaultTableModel model=(DefaultTableModel) tableCarrito.getModel(); 
 
-        model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo","Cantidad"});
+        //model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo","Cantidad"});
         
         do{
             try{
@@ -176,6 +253,63 @@ public class Principal extends javax.swing.JFrame {
        
     }
     
+    public void traeraTabla3()
+    {
+        txtVendido3.setText(corteTotal+"");
+        ArrayList<ClaseCorte> corte;
+        corte = ListaCorte();
+      
+        DefaultTableModel model=(DefaultTableModel) tableCorte3.getModel(); 
+
+        //model.setColumnIdentifiers(new Object[]{"ID","Fecha","Corte Realizado"});
+        model.setNumRows(0);            //resetear la tabla
+        
+       
+        
+        Object[] row = new Object[3];
+        
+        for(int i = 0; i < corte.size(); i++)
+        {
+            row[0] = corte.get(i).getId();
+            row[1] = corte.get(i).getFecha();
+            row[2] = corte.get(i).getCorte();
+            
+            
+            model.addRow(row);
+        }
+        
+       tableCorte3.setModel(model);
+       
+    }
+    
+    public void traeraTabla4(){
+        ArrayList<ClaseRealizados> realizados;
+        realizados = ListaRealizados();
+      
+        DefaultTableModel model=(DefaultTableModel) tableRealizados4.getModel(); 
+
+        //model.setColumnIdentifiers(new Object[]{"ID","Fecha","Corte Realizado"});
+        model.setNumRows(0);            //resetear la tabla
+        
+       
+        
+        Object[] row = new Object[4];
+        
+        for(int i = 0; i < realizados.size(); i++)
+        {
+            row[0] = realizados.get(i).getId();
+            row[1] = realizados.get(i).getComidas();
+            row[2] = realizados.get(i).getTotal();
+            row[3] = realizados.get(i).getFecha();
+
+            
+            
+            model.addRow(row);
+        }
+        
+       tableRealizados4.setModel(model);
+    }
+    
     public void eliminarComida(){
         DefaultTableModel model=(DefaultTableModel) tableCarrito.getModel();
         if (!tableCarrito.isRowSelected(tableCarrito.getSelectedRow()))
@@ -193,6 +327,7 @@ public class Principal extends javax.swing.JFrame {
         }
         tableComidas.clearSelection();
     }
+    
     public static String[] quitarlista(String[] list0, int index) 
     { 
   
@@ -231,7 +366,7 @@ public class Principal extends javax.swing.JFrame {
         Ventas frameVentas = new Ventas();
         frameVentas.setVisible(true);
         //send tabla del carro
-        frameVentas.jTable1.setModel(tableCarrito.getModel());
+        frameVentas.tableVentas.setModel(tableCarrito.getModel());
         //send encargos
         frameVentas.list0 = this.list0;
         frameVentas.maxDato = this.maxDato;
@@ -367,6 +502,59 @@ public class Principal extends javax.swing.JFrame {
              System.out.println(ex.getMessage());
         }
     }
+    
+    //para eliminar
+    public void eliminar2(){
+        int eliminar;
+        eliminar = JOptionPane.showConfirmDialog(null, "¿Realmente desea ELIMINAR!!?", "ELIMINAR!!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if(eliminar == JOptionPane.YES_OPTION){
+            
+
+            //HACER QUE MANDE NULL CUANDO ESTE EN BLACO, PROB CON IF
+            try{
+                
+                
+                Connection con = hacerConexion();
+                Statement st = con.createStatement();
+                Statement statement = con.createStatement();
+                statement.executeUpdate("DELETE FROM `comidas` WHERE `comidas`.`id` = "+txtModificarID2.getText()+";" );
+                con.close();
+                st.close();
+                
+                JOptionPane.showMessageDialog(null, "Eliminado con Exito!");
+            } catch (SQLException ex) {
+                 System.out.println(ex.getMessage());
+            }
+        }
+        
+    }
+    
+    //para realizar corte
+    public void RealizarCorte(){
+        Date fecha = new Date();
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+        String fechaString = DATE_FORMAT.format(fecha);
+        
+        try{
+            Connection con = hacerConexion();
+            Statement st = con.createStatement();
+            Statement statement = con.createStatement();
+            statement.executeUpdate("INSERT INTO `cortes` (`idCorte`, `fecha`, `corte`)"
+                                    + "VALUES(NULL, '"+fechaString+"', '"+corteTotal+"')" );
+            con.close();
+            st.close();
+            
+            corteTotal = 0;
+            txtVendido3.setText(corteTotal+"");
+            
+            JOptionPane.showMessageDialog(null, "Corte registrado con Exito!");
+        }catch(SQLException ex) {
+             System.out.println(ex.getMessage());
+            
+        }
+    }
+    
+    
     /**
      * Creates new form Principal
      */
@@ -425,6 +613,16 @@ public class Principal extends javax.swing.JFrame {
         btnEliminar2 = new javax.swing.JButton();
         btnAgregar2 = new javax.swing.JButton();
         tabCorte = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        txtVendido3 = new javax.swing.JTextField();
+        btnCorte3 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableCorte3 = new javax.swing.JTable();
+        tabRealizadas = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        tableRealizados4 = new javax.swing.JTable();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        lstComidas4 = new javax.swing.JList<>();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -504,10 +702,16 @@ public class Principal extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabEncargosLayout.createSequentialGroup()
                         .addComponent(btnEliminar0)
                         .addGap(11, 11, 11)))
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
 
         jTab.addTab("Encargos", tabEncargos);
+
+        tabVentas.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                tabVentasComponentShown(evt);
+            }
+        });
 
         jLabel1.setText("Seleccione un Item");
 
@@ -554,8 +758,7 @@ public class Principal extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(tableComidas);
         if (tableComidas.getColumnModel().getColumnCount() > 0) {
-            tableComidas.getColumnModel().getColumn(0).setPreferredWidth(2);
-            tableComidas.getColumnModel().getColumn(0).setMaxWidth(3);
+            tableComidas.getColumnModel().getColumn(0).setPreferredWidth(1);
             tableComidas.getColumnModel().getColumn(2).setPreferredWidth(20);
         }
 
@@ -586,6 +789,7 @@ public class Principal extends javax.swing.JFrame {
         if (tableCarrito.getColumnModel().getColumnCount() > 0) {
             tableCarrito.getColumnModel().getColumn(0).setPreferredWidth(15);
             tableCarrito.getColumnModel().getColumn(2).setPreferredWidth(20);
+            tableCarrito.getColumnModel().getColumn(3).setPreferredWidth(1);
         }
 
         btnEliminar.setText("Eliminar del carrito");
@@ -614,44 +818,43 @@ public class Principal extends javax.swing.JFrame {
                                 .addComponent(btnSiguiente, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(25, 25, 25))
                     .addGroup(tabVentasLayout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2)
-                        .addGap(172, 172, 172))
-                    .addGroup(tabVentasLayout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
                         .addGap(26, 26, 26)
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(27, 27, 27)
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(21, 21, 21))))
+                        .addGap(21, 21, 21))
+                    .addGroup(tabVentasLayout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addGap(170, 170, 170))))
         );
         tabVentasLayout.setVerticalGroup(
             tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(tabVentasLayout.createSequentialGroup()
-                .addGap(62, 62, 62)
+                .addGap(30, 30, 30)
                 .addGroup(tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
-                .addGap(40, 40, 40)
+                .addGap(18, 18, 18)
                 .addGroup(tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabVentasLayout.createSequentialGroup()
-                        .addGroup(tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnAgregar1)
-                            .addComponent(btnEliminar))
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSiguiente)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabVentasLayout.createSequentialGroup()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(120, 120, 120))))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(tabVentasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAgregar1)
+                    .addComponent(btnEliminar))
+                .addGap(18, 18, 18)
+                .addComponent(btnSiguiente)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabVentasLayout.createSequentialGroup()
+                .addContainerGap(67, Short.MAX_VALUE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(120, 120, 120))
         );
 
-        jTab.addTab("Ventas", tabVentas);
+        jTab.addTab("Hacer una venta", tabVentas);
 
         tabActualizar.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -696,6 +899,11 @@ public class Principal extends javax.swing.JFrame {
         });
 
         btnEliminar2.setText("ELIMINAR");
+        btnEliminar2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminar2ActionPerformed(evt);
+            }
+        });
 
         btnAgregar2.setText("Agregar");
         btnAgregar2.addActionListener(new java.awt.event.ActionListener() {
@@ -802,28 +1010,148 @@ public class Principal extends javax.swing.JFrame {
                     .addComponent(btnModificar2)
                     .addComponent(btnEliminar2)
                     .addComponent(btnAgregar2))
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addContainerGap(75, Short.MAX_VALUE))
             .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(tabActualizarLayout.createSequentialGroup()
                     .addGap(128, 128, 128)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(128, Short.MAX_VALUE)))
+                    .addContainerGap(125, Short.MAX_VALUE)))
         );
 
         jTab.addTab("Actualizar", tabActualizar);
+
+        tabCorte.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                tabCorteComponentShown(evt);
+            }
+        });
+
+        jLabel11.setText("Total vendido desde el ultimo corte:");
+
+        txtVendido3.setEditable(false);
+
+        btnCorte3.setText("Realizar Corte");
+        btnCorte3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCorte3ActionPerformed(evt);
+            }
+        });
+
+        tableCorte3.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Fecha", "Corte Realizado"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tableCorte3);
+        if (tableCorte3.getColumnModel().getColumnCount() > 0) {
+            tableCorte3.getColumnModel().getColumn(0).setPreferredWidth(2);
+        }
 
         javax.swing.GroupLayout tabCorteLayout = new javax.swing.GroupLayout(tabCorte);
         tabCorte.setLayout(tabCorteLayout);
         tabCorteLayout.setHorizontalGroup(
             tabCorteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 741, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabCorteLayout.createSequentialGroup()
+                .addGroup(tabCorteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(tabCorteLayout.createSequentialGroup()
+                        .addGap(80, 80, 80)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtVendido3, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(tabCorteLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnCorte3)))
+                .addGap(143, 143, 143))
+            .addGroup(tabCorteLayout.createSequentialGroup()
+                .addGap(134, 134, 134)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(155, Short.MAX_VALUE))
         );
         tabCorteLayout.setVerticalGroup(
             tabCorteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 374, Short.MAX_VALUE)
+            .addGroup(tabCorteLayout.createSequentialGroup()
+                .addGap(34, 34, 34)
+                .addGroup(tabCorteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(txtVendido3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnCorte3)
+                .addGap(34, 34, 34))
         );
 
         jTab.addTab("Corte", tabCorte);
+
+        tabRealizadas.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                tabRealizadasComponentShown(evt);
+            }
+        });
+
+        tableRealizados4.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID Venta", "Comidas", "Total", "Fecha"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, true, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tableRealizados4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableRealizados4MouseClicked(evt);
+            }
+        });
+        jScrollPane6.setViewportView(tableRealizados4);
+        if (tableRealizados4.getColumnModel().getColumnCount() > 0) {
+            tableRealizados4.getColumnModel().getColumn(0).setPreferredWidth(1);
+            tableRealizados4.getColumnModel().getColumn(2).setPreferredWidth(1);
+            tableRealizados4.getColumnModel().getColumn(3).setPreferredWidth(1);
+        }
+
+        jScrollPane7.setViewportView(lstComidas4);
+
+        javax.swing.GroupLayout tabRealizadasLayout = new javax.swing.GroupLayout(tabRealizadas);
+        tabRealizadas.setLayout(tabRealizadasLayout);
+        tabRealizadasLayout.setHorizontalGroup(
+            tabRealizadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabRealizadasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 515, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        tabRealizadasLayout.setVerticalGroup(
+            tabRealizadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(tabRealizadasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(tabRealizadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
+                    .addComponent(jScrollPane7))
+                .addContainerGap(29, Short.MAX_VALUE))
+        );
+
+        jTab.addTab("Ventas Realizadas", tabRealizadas);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -835,8 +1163,8 @@ public class Principal extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTab)
-                .addContainerGap())
+                .addComponent(jTab, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -900,7 +1228,7 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSiguienteActionPerformed
 
     private void jTabFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTabFocusGained
-        traeraTabla();
+        
     }//GEN-LAST:event_jTabFocusGained
 
     private void txtComida0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtComida0ActionPerformed
@@ -958,6 +1286,42 @@ public class Principal extends javax.swing.JFrame {
         // TODO add your handling code here:
         buscarComida2();
     }//GEN-LAST:event_btnBuscar2ActionPerformed
+
+    private void btnEliminar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminar2ActionPerformed
+        // TODO add your handling code here:
+        eliminar2();
+    }//GEN-LAST:event_btnEliminar2ActionPerformed
+
+    private void tabCorteComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tabCorteComponentShown
+        // TODO add your handling code here:
+        traeraTabla3();
+    }//GEN-LAST:event_tabCorteComponentShown
+
+    private void tabVentasComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tabVentasComponentShown
+        // TODO add your handling code here:
+         traeraTabla();
+    }//GEN-LAST:event_tabVentasComponentShown
+
+    private void btnCorte3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorte3ActionPerformed
+        // TODO add your handling code here:
+        RealizarCorte();
+    }//GEN-LAST:event_btnCorte3ActionPerformed
+
+    private void tabRealizadasComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tabRealizadasComponentShown
+        // TODO add your handling code here:
+        traeraTabla4();
+    }//GEN-LAST:event_tabRealizadasComponentShown
+
+    private void tableRealizados4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableRealizados4MouseClicked
+        // TODO add your handling code here:
+        //tableRealiados4.getValueAt(1, tableRealizados4.getSelectedRow());
+        String textoComidas;
+        textoComidas = (String)tableRealizados4.getValueAt(tableRealizados4.getSelectedRow(), 1);
+        
+        list4 = textoComidas.split("\\-");
+        lstComidas4.setListData(list4);
+            
+    }//GEN-LAST:event_tableRealizados4MouseClicked
     
     /**
      * @param args the command line arguments
@@ -999,6 +1363,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JButton btnAgregar1;
     private javax.swing.JButton btnAgregar2;
     private javax.swing.JButton btnBuscar2;
+    private javax.swing.JButton btnCorte3;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnEliminar0;
     private javax.swing.JButton btnEliminar2;
@@ -1006,6 +1371,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JButton btnSiguiente;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1014,21 +1380,28 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTabbedPane jTab;
     private javax.swing.JTable jTable1;
     public javax.swing.JList<String> lstComidas0;
+    private javax.swing.JList<String> lstComidas4;
     private javax.swing.JPanel tabActualizar;
     private javax.swing.JPanel tabCorte;
     private javax.swing.JPanel tabEncargos;
+    private javax.swing.JPanel tabRealizadas;
     private javax.swing.JPanel tabVentas;
     public javax.swing.JTable tableCarrito;
     private javax.swing.JTable tableComidas;
+    private javax.swing.JTable tableCorte3;
+    private javax.swing.JTable tableRealizados4;
     private javax.swing.JTextField txtAgregarCosto2;
     private javax.swing.JTextField txtAgregarID2;
     private javax.swing.JTextField txtAgregarNombre2;
@@ -1036,5 +1409,6 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JTextField txtModificarCosto2;
     private javax.swing.JTextField txtModificarID2;
     private javax.swing.JTextField txtModificarNombre2;
+    private javax.swing.JTextField txtVendido3;
     // End of variables declaration//GEN-END:variables
 }
