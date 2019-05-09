@@ -19,6 +19,7 @@ public class Ventas extends javax.swing.JFrame {
     int[] cantidad = new int[100];
     String listaComidas = "";
     public int maxDato = 0;
+    public double corteTotal = 0;
       //VER PORQUE NO PUEDO  SACAR EL TOTAL, ME MANDA UNA EXCEPCION AL CALCULARLO
     public void calcularTotal(){
         //ESTOY PENSANDO EN HACER ALGO PARA QUE ME MUESTRE EL TOTAL EN EL TXT
@@ -59,17 +60,31 @@ public class Ventas extends javax.swing.JFrame {
             return con;
     }
     
-    public void returnshit (){
-        Principal framePrincipal = new Principal();
-        framePrincipal.setVisible(true);
-        //regresar el carrito
-        framePrincipal.tableCarrito.setModel(tableVentas.getModel());
-        //regresar los encargos
-        framePrincipal.lstComidas0.setListData(list0);
-        framePrincipal.list0 = this.list0;
-        framePrincipal.maxDato = this.maxDato;
-        
-        this.dispose();
+    public void returnshit (boolean ventaHecha){
+        if (ventaHecha == false){
+            Principal framePrincipal = new Principal();
+            framePrincipal.setVisible(true);
+            //regresar el carrito
+            framePrincipal.tableCarrito.setModel(tableVentas.getModel());
+            //regresar los encargos
+            framePrincipal.lstComidas0.setListData(list0);
+            framePrincipal.list0 = this.list0;
+            framePrincipal.maxDato = this.maxDato;
+            framePrincipal.corteTotal = this.corteTotal;
+            framePrincipal.jTab.setSelectedIndex(1);
+            this.dispose();
+        }else{
+            Principal framePrincipal = new Principal();
+            framePrincipal.setVisible(true);
+
+            //regresar los encargos
+            framePrincipal.lstComidas0.setListData(list0);
+            framePrincipal.list0 = this.list0;
+            framePrincipal.maxDato = this.maxDato;
+            framePrincipal.corteTotal = this.corteTotal;
+            framePrincipal.jTab.setSelectedIndex(1);
+            this.dispose();
+        }
         
     }
     
@@ -116,8 +131,9 @@ public class Ventas extends javax.swing.JFrame {
                                     + "VALUES(NULL, '"+listaComidas+"', '"+total+"', '"+fechaString+"')" );
             con.close();
             st.close();
-
+            corteTotal += total;
             JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
+            returnshit(true);
         }catch(SQLException ex) {
              System.out.println(ex.getMessage());
             
@@ -149,6 +165,7 @@ public class Ventas extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Realizar Venta");
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -252,7 +269,7 @@ public class Ventas extends javax.swing.JFrame {
             tableVentas.getCellEditor().stopCellEditing();
         }
         
-        returnshit();;
+        returnshit(false);;
         /*
         Principal framePrincipal = new Principal();
         framePrincipal.setVisible(true);
@@ -277,6 +294,7 @@ public class Ventas extends javax.swing.JFrame {
         obtenerComidas();
         stringidComidas();
         registrarVenta();
+        
     }//GEN-LAST:event_btnRealizarActionPerformed
 
     /**

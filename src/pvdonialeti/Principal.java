@@ -22,7 +22,7 @@ public class Principal extends javax.swing.JFrame {
     public int[] comidaParaVenta = new int[100];
     public String[] list0 = new String[100];
     public String[] list4 = new String[100];
-    public double corteTotal = 1110;
+    public double corteTotal = 0;
     
     //public List<String> list0 = new ArrayList<String>();
     int maxDato = 0;
@@ -370,7 +370,7 @@ public class Principal extends javax.swing.JFrame {
         //send encargos
         frameVentas.list0 = this.list0;
         frameVentas.maxDato = this.maxDato;
-        
+        frameVentas.corteTotal = this.corteTotal;
         this.setVisible(false);
         
     }
@@ -639,6 +639,7 @@ public class Principal extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Punto de Venta - Doña Leti");
+        setResizable(false);
 
         jTab.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -1305,6 +1306,7 @@ public class Principal extends javax.swing.JFrame {
     private void btnCorte3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorte3ActionPerformed
         // TODO add your handling code here:
         RealizarCorte();
+        traeraTabla3();
     }//GEN-LAST:event_btnCorte3ActionPerformed
 
     private void tabRealizadasComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tabRealizadasComponentShown
@@ -1389,7 +1391,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JTabbedPane jTab;
+    public javax.swing.JTabbedPane jTab;
     private javax.swing.JTable jTable1;
     public javax.swing.JList<String> lstComidas0;
     private javax.swing.JList<String> lstComidas4;
@@ -1397,7 +1399,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JPanel tabCorte;
     private javax.swing.JPanel tabEncargos;
     private javax.swing.JPanel tabRealizadas;
-    private javax.swing.JPanel tabVentas;
+    public javax.swing.JPanel tabVentas;
     public javax.swing.JTable tableCarrito;
     private javax.swing.JTable tableComidas;
     private javax.swing.JTable tableCorte3;
