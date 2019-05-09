@@ -12,6 +12,7 @@ School Project made in java for Ingenieria de Software<br />
   -agregada la funcion "modificar"<br />
   -btn "modificar2" funcionando<br />
 ------------------------------------------<br />
+9/may/19<br />
 -agregado funcion "eliminar2"<br />
 -btn eliminar funcionando<br />
 -agregado todo la pestaña de Corte<br />
