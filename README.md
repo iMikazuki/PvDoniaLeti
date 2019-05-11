@@ -32,3 +32,7 @@ School Project made in java for Ingenieria de Software<br />
 -agergado lst para visualizar las comidas<br />
 -lst funcionando<br />
 ------------------------------------------<br />
+11/may16<br />
+-cambiada la bd a relacional<br />
+-CAMBIOS EN FUNCIONES MAYORES<br />
+------------------------------------------<br />
