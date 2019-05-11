@@ -683,8 +683,10 @@ public class Principal extends javax.swing.JFrame {
 
         jScrollPane5.setViewportView(lstComidas0);
 
+        jLabel12.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel12.setText("Agregar un encargo");
 
+        jLabel13.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel13.setText("Encargos Disponibles:");
 
         javax.swing.GroupLayout tabEncargosLayout = new javax.swing.GroupLayout(tabEncargos);
