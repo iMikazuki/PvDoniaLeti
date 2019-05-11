@@ -2,6 +2,7 @@ package pvdonialeti;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -15,44 +16,33 @@ import javax.swing.JOptionPane;
 public class Ventas extends javax.swing.JFrame {
     double total = 0;
     String[] list0 = new String[100];
-    String[] comida = new String[100];
+    int[] comida = new int[100];
     int[] cantidad = new int[100];
+    double[] costo = new double[100];
     String listaComidas = "";
     public int maxDato = 0;
     public double corteTotal = 0;
-      //VER PORQUE NO PUEDO  SACAR EL TOTAL, ME MANDA UNA EXCEPCION AL CALCULARLO
-    public void calcularTotal(){
-        //ESTOY PENSANDO EN HACER ALGO PARA QUE ME MUESTRE EL TOTAL EN EL TXT
-        //HAY UN PROBLEMA Y ES QUE TENGO QUE HACER QUE NO MANDE NULL POINTER
-        //DESDE BUSCAR STOCK OOOOOOOOOOOOOOOOOOOOOO HAGO UN TRY CATCH
-        //HACIENDO UN NUEVO METODO SOLO PARA ESO!!!
-    
-        
+    int ultimoID = 0;
+
+    public void calcularTotal(){       
         total = 0;
         
         try{
-            //jTable1.selectAll();
             for (int i = 0; i < tableVentas.getRowCount(); i++){
-                //cantidad[i] = (int) jTable1.getValueAt(i, 5);
-                //total = total + (double) jTable1.getValueAt(i, 3);
                 total = total + ((double)tableVentas.getValueAt(i, 2)*(int)tableVentas.getValueAt(i, 3));
-                //JOptionPane.showMessageDialog(jTable1.getValueAt(i, 2)+"");
             }
             txtTotal.setText(""+total);
-            //jTable1.clearSelection();
         }catch(NullPointerException ex) {
             System.out.println(ex.getMessage());  
-            //JOptionPane.showMessageDialog(null, "Ponga Cantidad!");
             txtTotal.setText("Verifique Cantidad!");
         }   
-        
     }
     
     public Connection hacerConexion(){
             Connection con = null;
 
             try{
-                con = DriverManager.getConnection("jdbc:mysql://localhost/pvdonialeti","root","");
+                con = DriverManager.getConnection("jdbc:mysql://localhost/pvdonialeti2","root","");
             }catch(SQLException ex){
                 System.out.println(ex.getMessage());
             }
@@ -88,25 +78,20 @@ public class Ventas extends javax.swing.JFrame {
         
     }
     
-    public void obtenerComidas(){
-        //HACER UN TRY `PARA NULLPOINTER PARA VERIFICAR QUE NO META NULL EN ARREGLO INT
-       
+    public void obtenerComidas(){   
+        
         tableVentas.selectAll();
         for(int i=0; i<tableVentas.getRowCount();i++){
            
             try{
-                comida[i] = (String) tableVentas.getValueAt(i, 1);
+                comida[i] = (int) tableVentas.getValueAt(i, 0);
+                costo[i] = (double) tableVentas.getValueAt(i, 2);
                 cantidad[i] = (int) tableVentas.getValueAt(i, 3);
-            }catch(NullPointerException ex){
-                
+            }catch(NullPointerException ex){      
                 tableVentas.clearSelection();
-                //jTable1.changeSelection(i, 5, true, true);
+                JOptionPane.showConfirmDialog(null, ex);
             }
-            
-            //JOptionPane.showMessageDialog(null, cantidad[i]);
         }
-        
-      
     }
     
     public void stringidComidas(){
@@ -118,7 +103,7 @@ public class Ventas extends javax.swing.JFrame {
         
     }
     
-    public void registrarVenta(){
+    public void registrarVentaTotal(){
         Date fecha = new Date();
         SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy");
         String fechaString = DATE_FORMAT.format(fecha);
@@ -127,17 +112,61 @@ public class Ventas extends javax.swing.JFrame {
             Connection con = hacerConexion();
             Statement st = con.createStatement();
             Statement statement = con.createStatement();
-            statement.executeUpdate("INSERT INTO `ventas` (`idVenta`, `comidas`, `total`,`fecha`)"
-                                    + "VALUES(NULL, '"+listaComidas+"', '"+total+"', '"+fechaString+"')" );
+            statement.executeUpdate("INSERT INTO `ventas_totales` (`id_venta`, `fecha_venta`, `precio`)"
+                                    + "VALUES(NULL, '"+fechaString+"', '"+total+"')" );
+           
             con.close();
             st.close();
             corteTotal += total;
-            JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
-            returnshit(true);
+            //JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
+            //returnshit(true);
         }catch(SQLException ex) {
              System.out.println(ex.getMessage());
             
         }
+    }
+    
+    public void obtenerUltimoID(){
+        try {
+            Statement st;
+            ResultSet rs = null;
+            Connection con = hacerConexion();
+            st = con.createStatement();
+            rs = st.executeQuery("SELECT * FROM `ventas_totales` ORDER BY `id_venta` DESC LIMIT 1");          
+            while(rs.next())
+            {         
+                ultimoID = rs.getInt(1);
+            }
+            con.close();
+            rs.close();
+        }catch(SQLException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public void registrarVentaUnitaria(){
+        double precioTot = 0;
+        
+        for (int i=0; i<comida.length; i++){
+            try{
+                precioTot = costo[i]*cantidad[i];
+                Connection con = hacerConexion();
+                Statement st = con.createStatement();
+                st.executeUpdate("INSERT INTO `ventas_unitarias` (`id_producto`, `id_venta_tot`, `cantidad`, `precio_total`)"
+                                        + "VALUES('"+comida[i]+"','"+ultimoID+"','"+cantidad[i]+"','"+precioTot+"')" );
+                con.close();
+                st.close();
+                
+                
+            }catch(SQLException ex) {
+                System.out.println(ex.getMessage());
+            
+            }
+            
+        }
+        JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
+        returnshit(true);
+        
     }
     
     /**
@@ -162,6 +191,8 @@ public class Ventas extends javax.swing.JFrame {
         txtTotal = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnRealizar = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Realizar Venta");
@@ -200,6 +231,7 @@ public class Ventas extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(tableVentas);
 
+        btnRegresar.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         btnRegresar.setText("Regresar");
         btnRegresar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -208,19 +240,25 @@ public class Ventas extends javax.swing.JFrame {
         });
 
         txtTotal.setEditable(false);
-        txtTotal.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        txtTotal.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         txtTotal.setForeground(new java.awt.Color(0, 0, 204));
         txtTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel1.setText("TOTAL:");
 
+        btnRealizar.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         btnRealizar.setText("Realizar Venta");
         btnRealizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRealizarActionPerformed(evt);
             }
         });
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setText("Resumen de la Venta");
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/document-preview.png"))); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -231,32 +269,50 @@ public class Ventas extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTotal)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addGap(0, 135, Short.MAX_VALUE))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 103, Short.MAX_VALUE)
+                                .addComponent(btnRealizar))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(txtTotal))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel1))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(37, 37, 37)
+                                        .addComponent(jLabel2))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(74, 74, 74)
+                                        .addComponent(jLabel3)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnRegresar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnRealizar)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(jLabel2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(32, 32, 32)
+                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(82, 82, 82)
+                        .addComponent(btnRealizar)))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnRegresar)
-                    .addComponent(btnRealizar))
+                .addComponent(btnRegresar)
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
@@ -291,10 +347,12 @@ public class Ventas extends javax.swing.JFrame {
 
     private void btnRealizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRealizarActionPerformed
         // TODO add your handling code here:
+        //obtenerComidas();
+        //stringidComidas();
+        registrarVentaTotal();
+        obtenerUltimoID();
         obtenerComidas();
-        stringidComidas();
-        registrarVenta();
-        
+        registrarVentaUnitaria();
     }//GEN-LAST:event_btnRealizarActionPerformed
 
     /**
@@ -336,6 +394,8 @@ public class Ventas extends javax.swing.JFrame {
     private javax.swing.JButton btnRealizar;
     private javax.swing.JButton btnRegresar;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JTable tableVentas;
     private javax.swing.JTextField txtTotal;
