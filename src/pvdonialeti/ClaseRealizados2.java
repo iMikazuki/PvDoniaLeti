@@ -8,10 +8,10 @@ public class ClaseRealizados2 {
     String nombre;
     int codVenta;
     String fecha;
-    int cantidad;
+    double cantidad;
     double precioTotal;
 
-    public ClaseRealizados2(String nombre, int codVenta, String fecha, int cantidad, double precioTotal) {
+    public ClaseRealizados2(String nombre, int codVenta, String fecha, double cantidad, double precioTotal) {
         this.nombre = nombre;
         this.codVenta = codVenta;
         this.fecha = fecha;
@@ -43,11 +43,11 @@ public class ClaseRealizados2 {
         this.fecha = fecha;
     }
 
-    public int getCantidad() {
+    public double getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {
+    public void setCantidad(double cantidad) {
         this.cantidad = cantidad;
     }
 

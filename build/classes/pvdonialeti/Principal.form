@@ -26,7 +26,7 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
-    <Property name="title" type="java.lang.String" value="Punto de Venta - Do&#xf1;a Leti"/>
+    <Property name="title" type="java.lang.String" value="Cocina Economica - Do&#xf1;a Leti"/>
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
@@ -63,9 +63,12 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JTabbedPane" name="jTab">
-      <Events>
-        <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jTabFocusGained"/>
-      </Events>
+      <Properties>
+        <Property name="selectedIndex" type="int" value="1"/>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Tahoma" size="11" style="1"/>
+        </Property>
+      </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
       </AuxValues>
@@ -96,7 +99,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jScrollPane5" pref="420" max="32767" attributes="0"/>
+                                  <Component id="jScrollPane5" pref="428" max="32767" attributes="0"/>
                                   <Component id="txtComida0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -104,7 +107,7 @@
                                   <Component id="btnEliminar0" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="btnAgregar0" alignment="1" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="101" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="93" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
                               <Component id="jLabel13" min="-2" max="-2" attributes="0"/>
@@ -121,8 +124,8 @@
                       <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtComida0" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnAgregar0" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtComida0" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
@@ -131,7 +134,7 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="jScrollPane5" pref="196" max="32767" attributes="0"/>
                           </Group>
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="32767" attributes="0"/>
                               <Component id="btnEliminar0" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -142,11 +145,6 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JTextField" name="txtComida0">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtComida0ActionPerformed"/>
-              </Events>
-            </Component>
             <Component class="javax.swing.JButton" name="btnAgregar0">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -204,6 +202,11 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Encargos Disponibles:"/>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="txtComida0">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtComida0KeyTyped"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -461,20 +464,21 @@
                       <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                              <Group type="102" alignment="1" attributes="0">
-                                  <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="txtAgregarCosto2" min="-2" pref="192" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="txtAgregarNombre2" min="-2" pref="192" max="-2" attributes="0"/>
-                              </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="102" max="-2" attributes="0"/>
                                   <Component id="txtAgregarID2" min="-2" pref="192" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jLabel6" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="76" max="32767" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                      <Component id="txtAgregarCosto2" pref="192" max="32767" attributes="0"/>
+                                      <Component id="txtAgregarNombre2" max="32767" attributes="0"/>
+                                  </Group>
                               </Group>
                           </Group>
                           <Component id="btnAgregar2" min="-2" max="-2" attributes="0"/>
@@ -637,16 +641,20 @@
                 <Property name="text" type="java.lang.String" value="Nombre"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="txtAgregarNombre2">
-            </Component>
             <Component class="javax.swing.JLabel" name="jLabel7">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Costo"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtAgregarCosto2">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtAgregarCosto2KeyTyped"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="txtModificarCosto2">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtModificarCosto2KeyTyped"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel8">
               <Properties>
@@ -654,6 +662,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtModificarID2">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtModificarID2KeyTyped"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel9">
               <Properties>
@@ -661,6 +672,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtModificarNombre2">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtModificarNombre2KeyTyped"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel10">
               <Properties>
@@ -709,6 +723,11 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAgregar2ActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JTextField" name="txtAgregarNombre2">
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtAgregarNombre2KeyTyped"/>
               </Events>
             </Component>
           </SubComponents>

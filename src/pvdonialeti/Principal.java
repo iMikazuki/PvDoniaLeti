@@ -8,6 +8,9 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -17,14 +20,12 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Principal extends javax.swing.JFrame {
     
-    private int[] comidaSeleccionada = new int[100];
-    public int[] comidaParaVenta = new int[100];
-    public String[] list0 = new String[100];
-    public String[] list4 = new String[100];
-    public double corteTotal = 0;
+    private int[] comidaSeleccionada = new int[100];    //array para transportar ID al carrito
+    public int[] comidaParaVenta = new int[100];        //array para transportar ID al carrito
+    public String[] list0 = new String[100];            //array para pestaña de Encargos
+    public double corteTotal = 0;                       //corte general
+    int maxDato = 0;                                    //me sirve para saber el dato del array list0
     
-    //public List<String> list0 = new ArrayList<String>();
-    int maxDato = 0;
      // CONECTAR A  LA BD
     public Connection hacerConexion(){
             Connection con = null;
@@ -38,11 +39,9 @@ public class Principal extends javax.swing.JFrame {
             return con;
     }
     
-   
-    public ArrayList<ClaseComida> ListaComidas()
-    {
+    //////////////////////////////////      ARRAYLIST     ///////////////////////////////////////////////// 
+    public ArrayList<ClaseComida> ListaComidas(){
         ArrayList<ClaseComida> comida = new ArrayList<>();
-        
         Statement st;
         ResultSet rs;
          
@@ -75,8 +74,7 @@ public class Principal extends javax.swing.JFrame {
         return comida;
     }
     
-    public ArrayList<ClaseCorte> ListaCorte()
-    {
+    public ArrayList<ClaseCorte> ListaCorte(){
         ArrayList<ClaseCorte> corte = new ArrayList<>();
         
         Statement st;
@@ -111,8 +109,7 @@ public class Principal extends javax.swing.JFrame {
         return corte;
     }
     
-    public ArrayList<ClaseRealizados2> ListaRealizados()
-    {
+    public ArrayList<ClaseRealizados2> ListaRealizados(){
         ArrayList<ClaseRealizados2> realizados = new ArrayList<>();
         
         Statement st;
@@ -125,7 +122,7 @@ public class Principal extends javax.swing.JFrame {
             //BUSQUEDA DEFAULT (ALL)
             
             String searchQuery = "SELECT nombre_prod nombre,ventas_totales.id_venta as'codigo de venta',"
-                    + "ventas_totales.fecha_venta as'fecha de venta', cantidad, productos.costo precio_total FROM productos,"
+                    + "ventas_totales.fecha_venta as'fecha de venta', cantidad, ventas_unitarias.precio_total precio_total FROM productos,"
                     + "ventas_unitarias,ventas_totales WHERE productos.id_prod=ventas_unitarias.id_producto AND "
                     + "ventas_totales.id_venta=ventas_unitarias.id_venta_tot ORDER BY `id_venta_tot`";
             
@@ -141,7 +138,7 @@ public class Principal extends javax.swing.JFrame {
                         rs.getString("nombre"),
                         rs.getInt("codigo de venta"),
                         rs.getString("fecha de venta"),
-                        rs.getInt("cantidad"),
+                        rs.getDouble("cantidad"),
                         rs.getDouble("precio_total")
                 );
                 realizados.add(claseRealizados);
@@ -190,18 +187,16 @@ public class Principal extends javax.swing.JFrame {
         return comida;
     }
     
+        ///////////////////////////////////////     FUNCIONES   /////////////////////////////////////////////
+    
+    //Trae la tabla al tab1 productos
     public void traeraTabla()
     {
         ArrayList<ClaseComida> comidas;
         comidas = ListaComidas();
-      
-        //DefaultTableModel model=(DefaultTableModel) tableComidas.getModel(); 
         DefaultTableModel model=(DefaultTableModel) tableComidas.getModel(); 
-        //DefaultTableModel model = new DefaultTableModel();
-        model.setNumRows(0);            //resetear la tabla
-        //model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo"});
         
-      
+        model.setNumRows(0);            //resetear la tabla
         Object[] row = new Object[3];
         
         for(int i = 0; i < comidas.size(); i++)
@@ -212,49 +207,36 @@ public class Principal extends javax.swing.JFrame {
             
             model.addRow(row);
         }
-       // tableComidas.setAutoResizeMode(tableComidas.AUTO_RESIZE_ALL_COLUMNS);
        
        tableComidas.setModel(model);
        
-      
     }
     
     //para traer a la tabla del carrito
-    public void traeraTabla2()
+    public void traeraTabla2(double cantidad)
     {
-        int cantidad = 0;
-        boolean esNumero = false;
         ArrayList<ClaseComida> comidas;
+        
         comidas = ListaComidasSeleccionadas();
-      
         DefaultTableModel model=(DefaultTableModel) tableCarrito.getModel(); 
-
-        //model.setColumnIdentifiers(new Object[]{"ID","Nombre","Costo","Cantidad"});
         
-        do{
-            try{
-                cantidad = Integer.valueOf(JOptionPane.showInputDialog(null, "Inserte cantidad:"));
-                
-                esNumero = true;
-            }catch(NumberFormatException n){
-                esNumero = false;
-            }
-        }while(esNumero == false);
-       
         
+            
+            
         Object[] row = new Object[4];
-        
+
         for(int i = 0; i < comidas.size(); i++)
         {
             row[0] = comidas.get(i).getId();
             row[1] = comidas.get(i).getNombre();
             row[2] = comidas.get(i).getCosto();
             row[3] = cantidad;
-            
+
             model.addRow(row);
         }
-        
+
        tableCarrito.setModel(model);
+       
        
     }
     
@@ -263,13 +245,9 @@ public class Principal extends javax.swing.JFrame {
         txtVendido3.setText(corteTotal+"");
         ArrayList<ClaseCorte> corte;
         corte = ListaCorte();
-      
         DefaultTableModel model=(DefaultTableModel) tableCorte3.getModel(); 
 
-        //model.setColumnIdentifiers(new Object[]{"ID","Fecha","Corte Realizado"});
         model.setNumRows(0);            //resetear la tabla
-        
-       
         
         Object[] row = new Object[3];
         
@@ -278,8 +256,7 @@ public class Principal extends javax.swing.JFrame {
             row[0] = corte.get(i).getId();
             row[1] = corte.get(i).getFecha();
             row[2] = corte.get(i).getCorte();
-            
-            
+               
             model.addRow(row);
         }
         
@@ -289,14 +266,10 @@ public class Principal extends javax.swing.JFrame {
     
     public void traeraTabla4(){
         ArrayList<ClaseRealizados2> realizados;
-        realizados = ListaRealizados();
-      
+        realizados = ListaRealizados();  
         DefaultTableModel model=(DefaultTableModel) tableRealizados4.getModel(); 
 
-        //model.setColumnIdentifiers(new Object[]{"ID","Fecha","Corte Realizado"});
         model.setNumRows(0);            //resetear la tabla
-        
-       
         
         Object[] row = new Object[5];
         
@@ -307,9 +280,7 @@ public class Principal extends javax.swing.JFrame {
             row[2] = realizados.get(i).getFecha();
             row[3] = realizados.get(i).getCantidad();
             row[4] = realizados.get(i).getPrecioTotal();
-
-            
-            
+   
             model.addRow(row);
         }
         
@@ -317,10 +288,12 @@ public class Principal extends javax.swing.JFrame {
     }
     
     public void eliminarComida(){
+        int[] row = new int[100];
         DefaultTableModel model=(DefaultTableModel) tableCarrito.getModel();
+        
         if (!tableCarrito.isRowSelected(tableCarrito.getSelectedRow()))
            JOptionPane.showMessageDialog(null, "Seleccione comida a ELIMINAR!");
-        int[] row = new int[100];
+        
         row = tableCarrito.getSelectedRows();
         for (int i=0; i<row.length; i++){
             try{
@@ -336,10 +309,7 @@ public class Principal extends javax.swing.JFrame {
     
     public static String[] quitarlista(String[] list0, int index) 
     { 
-  
-        // If the array is empty 
-        // or the index is not in array range 
-        // return the original array 
+        //para el array vacio
         if (list0 == null|| index < 0|| index >= list0.length) { 
             JOptionPane.showMessageDialog(null,  "Seleccione Elemento");
             return list0; 
@@ -367,7 +337,7 @@ public class Principal extends javax.swing.JFrame {
         return anotherArray; 
     } 
     
-    //para hacer la orde
+    //para hacer la orden 
     public void sendshit1(){
         Ventas frameVentas = new Ventas();
         frameVentas.setVisible(true);
@@ -386,11 +356,13 @@ public class Principal extends javax.swing.JFrame {
         String nombre2, costo2;
         nombre2 = txtAgregarNombre2.getText();
         costo2 = txtAgregarCosto2.getText();
+       
         try{
+            
+                
             Connection con = hacerConexion();
             Statement st = con.createStatement();
-            Statement statement = con.createStatement();
-            statement.executeUpdate("INSERT INTO `productos` (`id_prod`, `nombre_prod`, `costo`)"
+            st.executeUpdate("INSERT INTO `productos` (`id_prod`, `nombre_prod`, `costo`)"
                                     + "VALUES(NULL, '"+nombre2+"', '"+costo2+"')" );
             con.close();
             st.close();
@@ -401,9 +373,9 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Comida "+nombre2+ " Creado con exito!");
         }catch(SQLException ex) {
              System.out.println(ex.getMessage());
+             JOptionPane.showMessageDialog(null, "Verifique que los campos sean correctos");
             
-        }
-                
+        }         
     }
     
     //para mostrar el ultimo ID en el apartado agregar
@@ -415,19 +387,10 @@ public class Principal extends javax.swing.JFrame {
             st = con.createStatement();
             rs = st.executeQuery("SELECT * FROM `productos` ORDER BY `id_prod` DESC LIMIT 1");
      
-            
-            while(rs.next())
-            {        
-                
+            while(rs.next()){        
                 txtAgregarID2.setText (rs.getInt(1)+1+"");
             }
             
-            //txtIDCliente.setText(p.getllave()+""); 
-            /*
-             // or p.id=rs.getInt("userid"); by name of column
-            ClaseClientes p = new ClaseClientes();
-            txtIDCliente.setText(p.getllave()+""); 
-            */
             con.close();
             rs.close();
         }catch(SQLException ex){
@@ -438,43 +401,40 @@ public class Principal extends javax.swing.JFrame {
     //para hacer que me mande el objeto en a modificar
     public ArrayList<ClaseComida> comidaBuscada2(){
         ArrayList<ClaseComida> comida = new ArrayList<>();
-        
         Statement st;
         ResultSet rs;
          
         try{
             Connection con = hacerConexion();
-            st = con.createStatement();
-                              
+            st = con.createStatement();                            
             ClaseComida claseComida;
 
-            
-                String searchQuery = "SELECT * FROM `productos` WHERE `id_prod` ='"+txtModificarID2.getText()+"'";
-                rs = st.executeQuery(searchQuery);
-                while(rs.next())
-                {
-                    claseComida = new ClaseComida(
-                                     rs.getInt("id_prod"),
-                                 rs.getString("nombre_prod"),
-                                 rs.getDouble("costo")                                     
-                                );
-                    comida.add(claseComida);
-                }
+            String searchQuery = "SELECT * FROM `productos` WHERE `id_prod` ='"+txtModificarID2.getText()+"'";
+            rs = st.executeQuery(searchQuery);
+            while(rs.next())
+            {
+                claseComida = new ClaseComida(
+                             rs.getInt("id_prod"),
+                             rs.getString("nombre_prod"),
+                             rs.getDouble("costo")                                     
+                            );
+                comida.add(claseComida);
+            }
             
             con.close();
         }catch(SQLException ex){
             System.out.println(ex.getMessage());
         }
        
-        
         return comida;
     }
     
     //para mostrar la comida en los txt
     public void buscarComida2(){
+        txtModificarNombre2.setText("");
+        txtModificarCosto2.setText("");
         ArrayList<ClaseComida> comidas ;
         comidas = comidaBuscada2();
-        //DefaultTableModel model = new DefaultTableModel();
        
         for(int i = 0; i < comidas.size(); i++)
         {
@@ -490,7 +450,7 @@ public class Principal extends javax.swing.JFrame {
         id2 = txtModificarID2.getText();
         nombre2 = txtModificarNombre2.getText();
         costo2 = txtModificarCosto2.getText();
-        //HACER QUE MANDE NULL CUANDO ESTE EN BLACO, PROB CON IF
+        
         try{
             Connection con = hacerConexion();
             Statement st = con.createStatement();
@@ -506,6 +466,7 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Comida "+nombre2+" Modificado con Exito!");
         } catch (SQLException ex) {
              System.out.println(ex.getMessage());
+             JOptionPane.showMessageDialog(null, "Ingrese una busqueda correcta!");
         }
     }
     
@@ -514,15 +475,11 @@ public class Principal extends javax.swing.JFrame {
         int eliminar;
         eliminar = JOptionPane.showConfirmDialog(null, "¿Realmente desea ELIMINAR!!?", "ELIMINAR!!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if(eliminar == JOptionPane.YES_OPTION){
-            
-
-            //HACER QUE MANDE NULL CUANDO ESTE EN BLACO, PROB CON IF
             try{
-                
-                
                 Connection con = hacerConexion();
                 Statement st = con.createStatement();
                 Statement statement = con.createStatement();
+                
                 statement.executeUpdate("DELETE FROM `productos` WHERE `productos`.`id_prod` = "+txtModificarID2.getText()+";" );
                 con.close();
                 st.close();
@@ -530,6 +487,7 @@ public class Principal extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Eliminado con Exito!");
             } catch (SQLException ex) {
                  System.out.println(ex.getMessage());
+                 JOptionPane.showMessageDialog(null, "Ingrese una busqueda correcta!");
             }
         }
         
@@ -560,6 +518,30 @@ public class Principal extends javax.swing.JFrame {
         }
     }
     
+    /*public boolean PruebaParaIdiotas(){
+        boolean esEstupido = false;
+
+        Pattern patNombre = Pattern.compile("(\\w|\\s){0,29}");
+        Matcher matNombre = patNombre.matcher(txtAgregarNombre2.getText());
+        if (!matNombre.matches()){
+            JOptionPane.showMessageDialog(null,"Revise Nombre, maximo 30 caracteres alfanumericos");
+            txtAgregarNombre2.setText("");
+            esEstupido = true;
+        }
+        
+        Pattern patCost = Pattern.compile("(\\d){0,5}|(\\d{0,8}.\\d\\d?)");
+        Matcher matCost = patCost.matcher(txtAgregarCosto2.getText());
+        if(!matCost.matches()){
+            JOptionPane.showMessageDialog(null,"Revise Costo, formato (8,2)");
+            txtAgregarCosto2.setText("");
+            esEstupido = true;
+        }
+        
+        
+        
+        return esEstupido;
+    }*/
+    
     
     /**
      * Creates new form Principal
@@ -582,13 +564,13 @@ public class Principal extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jTab = new javax.swing.JTabbedPane();
         tabEncargos = new javax.swing.JPanel();
-        txtComida0 = new javax.swing.JTextField();
         btnAgregar0 = new javax.swing.JButton();
         btnEliminar0 = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         lstComidas0 = new javax.swing.JList<>();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        txtComida0 = new javax.swing.JTextField();
         tabVentas = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -607,7 +589,6 @@ public class Principal extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         txtAgregarID2 = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        txtAgregarNombre2 = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtAgregarCosto2 = new javax.swing.JTextField();
         txtModificarCosto2 = new javax.swing.JTextField();
@@ -620,6 +601,7 @@ public class Principal extends javax.swing.JFrame {
         btnModificar2 = new javax.swing.JButton();
         btnEliminar2 = new javax.swing.JButton();
         btnAgregar2 = new javax.swing.JButton();
+        txtAgregarNombre2 = new javax.swing.JTextField();
         tabCorte = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         txtVendido3 = new javax.swing.JTextField();
@@ -644,24 +626,14 @@ public class Principal extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jTable1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Punto de Venta - Doña Leti");
+        setTitle("Cocina Economica - Doña Leti");
         setResizable(false);
 
-        jTab.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                jTabFocusGained(evt);
-            }
-        });
+        jTab.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
 
         tabEncargos.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 tabEncargosFocusGained(evt);
-            }
-        });
-
-        txtComida0.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtComida0ActionPerformed(evt);
             }
         });
 
@@ -689,6 +661,12 @@ public class Principal extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel13.setText("Encargos Disponibles:");
 
+        txtComida0.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtComida0KeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout tabEncargosLayout = new javax.swing.GroupLayout(tabEncargos);
         tabEncargos.setLayout(tabEncargosLayout);
         tabEncargosLayout.setHorizontalGroup(
@@ -701,13 +679,13 @@ public class Principal extends javax.swing.JFrame {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(tabEncargosLayout.createSequentialGroup()
                         .addGroup(tabEncargosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
                             .addComponent(txtComida0))
                         .addGap(18, 18, 18)
                         .addGroup(tabEncargosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnEliminar0, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(btnAgregar0, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addGap(101, 101, 101))
+                        .addGap(93, 93, 93))
                     .addGroup(tabEncargosLayout.createSequentialGroup()
                         .addComponent(jLabel13)
                         .addGap(0, 0, Short.MAX_VALUE))))
@@ -719,8 +697,8 @@ public class Principal extends javax.swing.JFrame {
                 .addComponent(jLabel12)
                 .addGap(18, 18, 18)
                 .addGroup(tabEncargosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtComida0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAgregar0))
+                    .addComponent(btnAgregar0)
+                    .addComponent(txtComida0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(tabEncargosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(tabEncargosLayout.createSequentialGroup()
                         .addGap(30, 30, 30)
@@ -916,9 +894,33 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel7.setText("Costo");
 
+        txtAgregarCosto2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtAgregarCosto2KeyTyped(evt);
+            }
+        });
+
+        txtModificarCosto2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtModificarCosto2KeyTyped(evt);
+            }
+        });
+
         jLabel8.setText("ID");
 
+        txtModificarID2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtModificarID2KeyTyped(evt);
+            }
+        });
+
         jLabel9.setText("Nombre");
+
+        txtModificarNombre2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtModificarNombre2KeyTyped(evt);
+            }
+        });
 
         jLabel10.setText("Costo");
 
@@ -954,6 +956,12 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
+        txtAgregarNombre2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtAgregarNombre2KeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout tabActualizarLayout = new javax.swing.GroupLayout(tabActualizar);
         tabActualizar.setLayout(tabActualizarLayout);
         tabActualizarLayout.setHorizontalGroup(
@@ -962,18 +970,18 @@ public class Principal extends javax.swing.JFrame {
                 .addGap(31, 31, 31)
                 .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(tabActualizarLayout.createSequentialGroup()
-                            .addComponent(jLabel7)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtAgregarCosto2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, tabActualizarLayout.createSequentialGroup()
-                            .addComponent(jLabel6)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtAgregarNombre2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, tabActualizarLayout.createSequentialGroup()
                             .addComponent(jLabel5)
                             .addGap(102, 102, 102)
-                            .addComponent(txtAgregarID2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtAgregarID2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(tabActualizarLayout.createSequentialGroup()
+                            .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel7)
+                                .addComponent(jLabel6))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtAgregarCosto2, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
+                                .addComponent(txtAgregarNombre2))))
                     .addComponent(btnAgregar2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
                 .addGroup(tabActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -1189,6 +1197,8 @@ public class Principal extends javax.swing.JFrame {
 
         jTab.addTab("Ventas Realizadas", tabRealizadas);
 
+        jTab.setSelectedIndex(1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -1208,73 +1218,70 @@ public class Principal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAgregar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregar1ActionPerformed
-        // TODO add your handling code here:
-        // get nomre para buscar en bd
-        //QUEDO PERFECTO, SOLO TENGO QUE HACER QUE VERIFIQUE QUE NO AGREGUE LA MISMA COMIDA
         int columna = 0;
         int[] row = new int[100];
-        if (tableCarrito.getCellEditor() != null) {
-            tableCarrito.getCellEditor().stopCellEditing();
-        }
 
         row = tableComidas.getSelectedRows();
         
         //pruebas para idiotas
         if (!tableComidas.isRowSelected(tableComidas.getSelectedRow()))
-        JOptionPane.showMessageDialog(null, "Seleccione comida!");
-        for (int i=0; i<row.length; i++){
-            comidaSeleccionada[i] =  (int) tableComidas.getValueAt(row[i], columna);
-            //JOptionPane.showMessageDialog(null, comidaSeleccionada[i] );
+             JOptionPane.showMessageDialog(null, "Seleccione comida!");
+        else{
+            for (int i=0; i<row.length; i++){
+                comidaSeleccionada[i] =  (int) tableComidas.getValueAt(row[i], columna);
+            }
+            if (comidaSeleccionada != null ){
+                double cantidad = 0;
+                String input = JOptionPane.showInputDialog("Inserte cantidad:");
+                
+                try{
+                    
+                    if (input.matches("\\d.5|\\d+|\\d+.5||.5")){
+                        cantidad = Double.parseDouble(input);
+                        traeraTabla2(cantidad);
+                    }
+                    
+                }catch(NumberFormatException n ){
+                    
+                    JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido");
+                }catch(PatternSyntaxException n){
+                   
+                    JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido");
+                }catch(NullPointerException n ){
+                    if (cantidad != 0)
+                    JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido");
+                }
+                
+            }
+            tableComidas.clearSelection();
         }
-        if (comidaSeleccionada != null )
-            traeraTabla2();
-
-        tableComidas.clearSelection();
-        
     
     }//GEN-LAST:event_btnAgregar1ActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        // TODO add your handling code here:
         eliminarComida();
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSiguienteActionPerformed
-        // TODO add your handling code here:
         
-
         int columna = 0;
         int[] row = new int[100];
-        //para hacer que guarde el ultimo cambio en el editor
-        if (tableCarrito.getCellEditor() != null) {
-            tableCarrito.getCellEditor().stopCellEditing();
-        }
-        //jTable1.clearSelection();
         tableCarrito.selectAll();
         row = tableCarrito.getSelectedRows();
-        for (int i=0; i<row.length; i++){
-            try{
-                comidaParaVenta[i] =  (int) tableCarrito.getValueAt(row[i], columna);
-            }catch(ArrayIndexOutOfBoundsException ex){
-                JOptionPane.showMessageDialog(null,"Porfavor, seleccione una comida");
-            }
+        if (row.length != 0){        
+            //for (int i=0; i<row.length; i++){
+                    //comidaParaVenta[i] =  (int) tableCarrito.getValueAt(row[i], columna);
+             sendshit1();
+            //}
+        }else{
+            JOptionPane.showMessageDialog(null,"Carrito vacio!");  
         }
-
-        sendshit1();
+        
     }//GEN-LAST:event_btnSiguienteActionPerformed
 
-    private void jTabFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTabFocusGained
-        
-    }//GEN-LAST:event_jTabFocusGained
-
-    private void txtComida0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtComida0ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtComida0ActionPerformed
-
     private void btnEliminar0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminar0ActionPerformed
-        // TODO add your handling code here:
-        //lstComidas0.getSelectedIndex();
         int preguntar = JOptionPane.showConfirmDialog(null, "Desea eliminar?");
+        
         if (preguntar == 0){
             list0 = quitarlista(list0, lstComidas0.getSelectedIndex());
             lstComidas0.setListData(list0);
@@ -1282,22 +1289,18 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnEliminar0ActionPerformed
 
     private void btnAgregar0ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregar0ActionPerformed
-        // TODO add your handling code here:
         if(txtComida0.equals(null)){
             JOptionPane.showMessageDialog(null, "Espacio en blanco!");
-            
         }else{
-            
             list0 [maxDato] = txtComida0.getText();
             maxDato++;
             lstComidas0.setListData(list0);
             txtComida0.setText("");
         }
-        //lstComidas0.set
+
     }//GEN-LAST:event_btnAgregar0ActionPerformed
 
     private void tabEncargosFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tabEncargosFocusGained
-        // TODO add your handling code here:
         if (list0 != null)
             lstComidas0.setListData(list0);
     }//GEN-LAST:event_tabEncargosFocusGained
@@ -1308,14 +1311,30 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_tabActualizarComponentShown
 
     private void btnAgregar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregar2ActionPerformed
-        // TODO add your handling code here:
-        agregarcomidas2();
-        mostrarId2();
+        
+        if (txtAgregarCosto2.getText().isEmpty() == false && txtAgregarNombre2.getText().isEmpty() == false &&
+                txtAgregarNombre2.getText().matches("\\s+") == false){
+            agregarcomidas2();
+            mostrarId2();
+        }else{
+            JOptionPane.showMessageDialog(null, "Verifique campos vacios");
+                    
+        }
+            
+        
+        
+        
     }//GEN-LAST:event_btnAgregar2ActionPerformed
 
     private void btnModificar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificar2ActionPerformed
-        // TODO add your handling code here:
-        modificar2();
+        if (txtModificarCosto2.getText().isEmpty() == false && txtModificarNombre2.getText().isEmpty() == false &&
+                txtModificarNombre2.getText().matches("\\s+") == false){
+            modificar2();
+        }else{
+            JOptionPane.showMessageDialog(null, "Verifique campos vacios");
+                    
+        }
+        
     }//GEN-LAST:event_btnModificar2ActionPerformed
 
     private void btnBuscar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscar2ActionPerformed
@@ -1352,6 +1371,54 @@ public class Principal extends javax.swing.JFrame {
     private void tableRealizados4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableRealizados4MouseClicked
 
     }//GEN-LAST:event_tableRealizados4MouseClicked
+
+    private void txtAgregarCosto2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAgregarCosto2KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (!Character.isDigit(test)&&!(test =='.'))
+            evt.consume();
+        if (txtAgregarCosto2.getText().length()>7)
+            evt.consume();
+    }//GEN-LAST:event_txtAgregarCosto2KeyTyped
+
+    private void txtAgregarNombre2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAgregarNombre2KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (txtAgregarNombre2.getText().length()>29)
+            evt.consume();
+    }//GEN-LAST:event_txtAgregarNombre2KeyTyped
+
+    private void txtModificarNombre2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtModificarNombre2KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (txtAgregarNombre2.getText().length()>29)
+            evt.consume();
+    }//GEN-LAST:event_txtModificarNombre2KeyTyped
+
+    private void txtModificarCosto2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtModificarCosto2KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (!Character.isDigit(test)&&!(test =='.'))
+            evt.consume();
+        if (txtAgregarCosto2.getText().length()>7)
+            evt.consume();
+    }//GEN-LAST:event_txtModificarCosto2KeyTyped
+
+    private void txtModificarID2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtModificarID2KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (!Character.isDigit(test))
+            evt.consume();
+        if (txtAgregarCosto2.getText().length()>9)
+            evt.consume();
+    }//GEN-LAST:event_txtModificarID2KeyTyped
+
+    private void txtComida0KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtComida0KeyTyped
+        char test = evt.getKeyChar();
+        
+        if (txtComida0.getText().length()>49)
+            evt.consume();
+    }//GEN-LAST:event_txtComida0KeyTyped
     
     /**
      * @param args the command line arguments

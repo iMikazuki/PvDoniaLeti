@@ -17,7 +17,7 @@ public class Ventas extends javax.swing.JFrame {
     double total = 0;
     String[] list0 = new String[100];
     int[] comida = new int[100];
-    int[] cantidad = new int[100];
+    double[] cantidad = new double[100];
     double[] costo = new double[100];
     String listaComidas = "";
     public int maxDato = 0;
@@ -29,7 +29,7 @@ public class Ventas extends javax.swing.JFrame {
         
         try{
             for (int i = 0; i < tableVentas.getRowCount(); i++){
-                total = total + ((double)tableVentas.getValueAt(i, 2)*(int)tableVentas.getValueAt(i, 3));
+                total = total + ((double)tableVentas.getValueAt(i, 2)*(double)tableVentas.getValueAt(i, 3));
             }
             txtTotal.setText(""+total);
         }catch(NullPointerException ex) {
@@ -81,12 +81,12 @@ public class Ventas extends javax.swing.JFrame {
     public void obtenerComidas(){   
         
         tableVentas.selectAll();
-        for(int i=0; i<tableVentas.getRowCount();i++){
+        for(int i=0; i<tableVentas.getSelectedRowCount();i++){
            
             try{
                 comida[i] = (int) tableVentas.getValueAt(i, 0);
                 costo[i] = (double) tableVentas.getValueAt(i, 2);
-                cantidad[i] = (int) tableVentas.getValueAt(i, 3);
+                cantidad[i] = (double) tableVentas.getValueAt(i, 3);
             }catch(NullPointerException ex){      
                 tableVentas.clearSelection();
                 JOptionPane.showConfirmDialog(null, ex);
@@ -97,7 +97,6 @@ public class Ventas extends javax.swing.JFrame {
     public void stringidComidas(){
         listaComidas = "";
         for (int i=0; i<tableVentas.getRowCount(); i++){
-            //CORREGIR
             listaComidas = "["+comida[i] + ", Cantidad: " + cantidad[i] + "]-" + listaComidas ;
         }
         
@@ -112,14 +111,13 @@ public class Ventas extends javax.swing.JFrame {
             Connection con = hacerConexion();
             Statement st = con.createStatement();
             Statement statement = con.createStatement();
+            
             statement.executeUpdate("INSERT INTO `ventas_totales` (`id_venta`, `fecha_venta`, `precio`)"
                                     + "VALUES(NULL, '"+fechaString+"', '"+total+"')" );
-           
+            
             con.close();
             st.close();
             corteTotal += total;
-            //JOptionPane.showMessageDialog(null, "Venta registrada con Exito!");
-            //returnshit(true);
         }catch(SQLException ex) {
              System.out.println(ex.getMessage());
             
@@ -146,21 +144,27 @@ public class Ventas extends javax.swing.JFrame {
     
     public void registrarVentaUnitaria(){
         double precioTot = 0;
-        
-        for (int i=0; i<comida.length; i++){
+        //JOptionPane.showMessageDialog(null, comida.length);
+        //Esto esta mal comida.length es 100 no no la cantidad,marca SQLException ex
+        //Pero si executa el update en la BD
+        for (int i=0; i<=comida.length; i++){
             try{
                 precioTot = costo[i]*cantidad[i];
                 Connection con = hacerConexion();
                 Statement st = con.createStatement();
-                st.executeUpdate("INSERT INTO `ventas_unitarias` (`id_producto`, `id_venta_tot`, `cantidad`, `precio_total`)"
+                st.execute("INSERT INTO `ventas_unitarias` (`id_producto`, `id_venta_tot`, `cantidad`, `precio_total`)"
                                         + "VALUES('"+comida[i]+"','"+ultimoID+"','"+cantidad[i]+"','"+precioTot+"')" );
+                
+              
                 con.close();
                 st.close();
                 
                 
             }catch(SQLException ex) {
-                System.out.println(ex.getMessage());
+                //System.out.println(ex.getMessage());
             
+            }catch(NullPointerException ex) {
+                System.out.println(ex.getMessage());
             }
             
         }
@@ -321,23 +325,7 @@ public class Ventas extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-        if (tableVentas.getCellEditor() != null) {
-            tableVentas.getCellEditor().stopCellEditing();
-        }
-        
         returnshit(false);;
-        /*
-        Principal framePrincipal = new Principal();
-        framePrincipal.setVisible(true);
-        //regresar el carrito
-        framePrincipal.tableCarrito.setModel(jTable1.getModel());
-        //regresar los encargos
-        framePrincipal.lstComidas0.setListData(list0);
-        framePrincipal.list0 = this.list0;
-        framePrincipal.maxDato = this.maxDato;
-        
-        this.dispose();
-        */
     }//GEN-LAST:event_btnRegresarActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
@@ -347,8 +335,6 @@ public class Ventas extends javax.swing.JFrame {
 
     private void btnRealizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRealizarActionPerformed
         // TODO add your handling code here:
-        //obtenerComidas();
-        //stringidComidas();
         registrarVentaTotal();
         obtenerUltimoID();
         obtenerComidas();
