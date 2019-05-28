@@ -1359,8 +1359,13 @@ public class Principal extends javax.swing.JFrame {
 
     private void btnCorte3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorte3ActionPerformed
         // TODO add your handling code here:
-        RealizarCorte();
-        traeraTabla3();
+        if (corteTotal == 0)
+            JOptionPane.showMessageDialog(null, "No hay nada vendido aun!");
+        else{
+            RealizarCorte();
+            traeraTabla3();
+        }
+        
     }//GEN-LAST:event_btnCorte3ActionPerformed
 
     private void tabRealizadasComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tabRealizadasComponentShown

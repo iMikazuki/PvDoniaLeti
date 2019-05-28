@@ -144,10 +144,8 @@ public class Ventas extends javax.swing.JFrame {
     
     public void registrarVentaUnitaria(){
         double precioTot = 0;
-        //JOptionPane.showMessageDialog(null, comida.length);
-        //Esto esta mal comida.length es 100 no no la cantidad,marca SQLException ex
-        //Pero si executa el update en la BD
-        for (int i=0; i<=comida.length; i++){
+        
+        for (int i=0; i<=tableVentas.getRowCount(); i++){
             try{
                 precioTot = costo[i]*cantidad[i];
                 Connection con = hacerConexion();
