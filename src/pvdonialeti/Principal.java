@@ -442,6 +442,8 @@ public class Principal extends javax.swing.JFrame {
             txtModificarNombre2.setText(comidas.get(i).getNombre()+"");
             txtModificarCosto2.setText(comidas.get(i).getCosto()+"");
         }
+        if (txtModificarNombre2.getText().isEmpty() && txtModificarCosto2.getText().isEmpty())
+            JOptionPane.showMessageDialog(null, "No se econtro comida, verifique ID");
     }
     
     //para modificar
@@ -1232,19 +1234,21 @@ public class Principal extends javax.swing.JFrame {
             }
             if (comidaSeleccionada != null ){
                 double cantidad = 0;
-                String input = JOptionPane.showInputDialog("Inserte cantidad:");
+                
                 
                 try{
-                    
+                    String input = JOptionPane.showInputDialog("Inserte cantidad:");
                     if (input.matches("\\d.5|\\d+|\\d+.5||.5")){
                         cantidad = Double.parseDouble(input);
                         traeraTabla2(cantidad);
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido\n"
+                                + "Si desea instroducir media orden, puede poner \".5\"");
                     }
                     
-                }catch(NumberFormatException n ){
-                    
-                    JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido");
                 }catch(PatternSyntaxException n){
+                    
+                }catch(NumberFormatException n){
                    
                     JOptionPane.showMessageDialog(null, "Porfavor instroduzca un digito valido");
                 }catch(NullPointerException n ){
